@@ -1,0 +1,1 @@
+/Users/harmeepatel/Developer/projects/dsa/ginorst/target/debug/ginorst: /Users/harmeepatel/Developer/projects/dsa/ginorst/src/insertion.rs /Users/harmeepatel/Developer/projects/dsa/ginorst/src/main.rs
