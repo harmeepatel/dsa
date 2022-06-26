@@ -1,11 +1,12 @@
-pub struct Insertion<'a> {
+pub struct Sort<'a> {
     pub unsorted: &'a mut Vec<isize>,
 }
 
-impl Insertion<'_> {
-    pub fn new(arr: &mut Vec<isize>) -> Insertion {
-        Insertion { unsorted: arr }
+impl Sort<'_> {
+    pub fn new(arr: &mut Vec<isize>) -> Sort {
+        Sort { unsorted: arr }
     }
+    #[allow(dead_code)]
     pub fn sort(&mut self) {
         let arr = &mut self.unsorted;
         for i in 1..arr.len() {
