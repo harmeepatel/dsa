@@ -6,7 +6,4 @@ struct Sorter {
 
 fn main() {
     let mut unsorted = vec![5, 4, 3, 2, 1];
-    println!("{:?}", unsorted);
-    crate::insertion::sort(&mut unsorted);
-    println!("{:?}", unsorted);
 }
