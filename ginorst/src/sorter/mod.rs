@@ -10,8 +10,8 @@ impl Sorter<'_> {
     }
     pub fn sort(&mut self) {
         let mut arr = &mut self.unsorted;
-        println!("unsorted:\t{:?}", arr);
+        println!("unsorted:\t{:?}", &arr);
         insertion::sort(&mut arr);
-        println!("sorted: \t{:?}", arr);
+        println!("sorted: \t{:?}", &arr);
     }
 }
