@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "ginorst"
+name = "dsa"
 version = "0.1.0"
