@@ -1,22 +1,22 @@
 #![allow(dead_code)]
 
-use std::{cell::RefCell, rc::Rc};
+use std::{borrow::BorrowMut, rc::Rc};
 
 fn main() {}
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 struct Node<T>
 where
-    T: std::fmt::Debug,
+// T: std::fmt::Debug,
 {
     val: T,
-    next: Option<Rc<RefCell<Node<T>>>>,
-    prev: Option<Rc<RefCell<Node<T>>>>,
+    next: Option<Box<Node<T>>>,
+    prev: Option<Box<Node<T>>>,
 }
 
 impl<T> Node<T>
 where
-    T: std::fmt::Debug,
+// T: std::fmt::Debug,
 {
     fn new(val: T) -> Node<T> {
         Node {
@@ -27,35 +27,33 @@ where
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 struct DLL<T>
 where
-    T: std::fmt::Debug,
+// T: std::fmt::Debug,
 {
-    head: Rc<RefCell<Node<T>>>,
+    head: Box<Node<T>>,
     length: usize,
 }
 
 impl<T> DLL<T>
 where
-    T: std::fmt::Debug + std::clone::Clone,
+// T: std::fmt::Debug + std::clone::Clone,
 {
     fn new(val: T) -> DLL<T> {
-        let t = DLL {
-            head: Rc::new(RefCell::new(Node::new(val))),
+        DLL {
+            head: Box::new(Node::new(val)),
             length: 1,
-        };
-        t
+        }
     }
 
-    fn append(&mut self, val: T) {
-        let new_node = Rc::new(Node::new(val));
-        while let Some(x) = self.head.to_owned() {
-            *Rc::get_mut(&mut self.head).unwrap() = Rc::try_unwrap(*x).ok().unwrap();
+    fn push(&mut self, val: T) {
+        let _new_node = Rc::new(Node::new(val));
+        while let x = self.head.next {
+            
         }
-        // new_node.borrow_mut().prev = Some(self.head.clone());
-        // self.head.borrow_mut().next = Some(new_node);
-        self.length += 1;
+
+        *self.length.borrow_mut() += 1;
     }
 
     // fn prepend(&mut self, val: T) {
@@ -66,12 +64,6 @@ where
     //     self.length += 1;
     // }
 
-    // fn walk_till_end(&mut self) {
-    //     while let Some(x) = &self.head.next {
-    //         *Rc::get_mut(&mut cur).unwrap() = Rc::try_unwrap(*x).ok().unwrap();
-    //     }
-    //     dbg!(&self.head);
-    // }
     fn insert_at(self) {}
     fn remove(self) {}
     fn get(self) {}
@@ -86,11 +78,11 @@ mod test {
     fn new_node() {
         let val = 2;
         let nn = DLL::new(val);
-        let a = Rc::new(RefCell::new(Node {
+        let a = Box::new(Node {
             val,
             next: None,
             prev: None,
-        }));
+        });
 
         assert_eq!(nn, DLL { head: a, length: 1 });
     }
