@@ -8,8 +8,8 @@ export default class DLL<T> {
     head: Item<T>;
     length: number;
 
-    constructor(head: Item<T>) {
-        this.head = head;
+    constructor(node: Item<T>) {
+        this.head = node;
         this.length = 1;
     }
 
@@ -101,7 +101,7 @@ export default class DLL<T> {
             );
             return;
         }
-        if (idx === this.length) {
+        if (idx + 1 === this.length) {
             this.pop();
             return;
         }
@@ -121,13 +121,33 @@ export default class DLL<T> {
                         cur.next.prev = cur.prev;
                     }
 
-                    this.length++;
+                    this.length--;
                     break;
                 }
                 cur = cur.next;
                 c++;
             }
         }
+    }
+
+    replace(idx: number, val: T) {
+        if (idx > this.length) {
+            console.log(
+                `List length(${this.length}) exceeded. Cannot replace at ${idx}`,
+            );
+            return;
+        }
+        let c = 0;
+        let cur = this.head;
+        while (cur.next) {
+            if (c === idx) {
+                cur.val = val
+                break;
+            }
+            cur = cur.next;
+            c++;
+        }
+        cur.val = val;
     }
 
     get(idx: number) {
