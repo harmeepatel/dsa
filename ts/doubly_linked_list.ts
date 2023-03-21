@@ -6,33 +6,31 @@ type Item<T> = {
 
 export default class DLL<T> {
     head: Item<T>;
+    tail: Item<T>;
     length: number;
 
     constructor(node: Item<T>) {
         this.head = node;
+        this.tail = node;
         this.length = 1;
     }
 
     push(node: Item<T>) {
-        let cur = this.head;
-        while (cur.next) {
-            cur = cur.next;
-        }
-        cur.next = node;
-        node.prev = cur;
+        this.tail.next = node;
+        node.prev = this.tail;
+        this.tail = node;
 
         this.length++;
     }
 
     pop() {
-        let cur = this.head;
-        while (cur.next) {
-            cur = cur.next;
+        if (this.tail.prev) {
+            this.tail = this.tail.prev;
         }
-        if (cur.prev) {
-            cur.prev.next = null;
+        if (this.tail.next) {
+            this.tail.next.prev = null;
         }
-        cur.prev = null;
+        this.tail.next = null;
 
         this.length--;
     }
