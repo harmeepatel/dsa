@@ -83,6 +83,7 @@ export default class DLL<T> {
         }
         if (idx === this.length) {
             this.push(node);
+            console.log("pushing");
             return;
         }
 
