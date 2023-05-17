@@ -1,4 +1,4 @@
-import DLL from "./doubly_linked_list.ts";
+import DLL from "../doubly_linked_list.ts";
 const LARGE_NUM = 2048;
 
 let list = new DLL({ val: 1, next: null, prev: null });

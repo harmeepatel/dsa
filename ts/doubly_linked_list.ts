@@ -1,184 +1,163 @@
-type Item<T> = {
-    val: T;
-    next: Item<T> | null;
-    prev: Item<T> | null;
+type OptNode<T> = Node<T> | null;
+
+type Node<T> = {
+    val: T | undefined;
+    next: OptNode<T>;
+    prev: OptNode<T>;
 };
 
 export default class DLL<T> {
-    head: Item<T>;
-    tail: Item<T>;
+    head: OptNode<T>;
+    tail: OptNode<T>;
     length: number;
 
-    constructor(node: Item<T>) {
-        this.head = node;
-        this.tail = node;
-        this.length = 1;
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.length = 0;
     }
 
-    push(node: Item<T>) {
+    push(node: Node<T>) {
+        ++this.length;
+        if (!this.tail) {
+            this.tail = node;
+            this.head = node;
+            return;
+        }
+
         this.tail.next = node;
         node.prev = this.tail;
         this.tail = node;
-
-        this.length++;
     }
 
-    pop() {
-        if (this.tail.prev) {
-            this.tail = this.tail.prev;
-        }
-        if (this.tail.next) {
-            this.tail.next.prev = null;
-        }
-        this.tail.next = null;
+    pop(): T | undefined {
+        --this.length;
 
-        this.length--;
+        let popElem = this.tail;
+        if (popElem) {
+            this.tail = popElem.prev;
+            popElem.prev = null;
+        }
+        if (this.tail) {
+            this.tail.next = null;
+        }
+        return popElem ? popElem.val : undefined;
     }
 
-    pushFront(node: Item<T>) {
-        let cur = this.head;
-        while (cur.prev) {
-            cur = cur.prev;
-        }
-        cur.prev = node;
-        node.next = cur;
-        this.head = node;
+    pushFront(node: Node<T>) {
+        ++this.length;
 
-        this.length++;
-    }
-
-    popFront() {
-        if (this.head.next) {
-            this.head = this.head.next;
-            if (this.head.prev) {
-                this.head.prev.next = null;
-            }
-            this.head.prev = null;
-        }
-        this.length--;
-    }
-
-    insertAt(idx: number, node: Item<T>) {
-        if (idx > this.length) {
-            console.log(
-                `List length(${this.length}) exceeded. Cannot insert ${node.val} at ${idx}`,
-            );
+        if (!this.head) {
+            this.head = node;
+            this.tail = node;
             return;
         }
-        if (idx === this.length) {
-            this.push(node);
+
+        node.next = this.head;
+        this.head.prev = node;
+        this.head = node;
+    }
+
+    popFront(): T | undefined {
+        --this.length;
+
+        let popElem = this.head;
+        if (popElem) {
+            this.head = popElem.next;
+            popElem.next = null;
+        }
+        if (this.head) {
+            this.head.prev = null;
+        }
+        return popElem ? popElem.val : undefined;
+    }
+
+    insertAt(idx: number, node: Node<T>) {
+        if (idx > this.length) {
+            console.log("Invaild Index!");
             return;
         }
         if (idx === 0) {
             this.pushFront(node);
             return;
         }
-        let c = 1;
-        let cur = this.head;
-        while (cur.next) {
-            if (c === idx) {
-                node.next = cur.next;
-                node.prev = cur;
-                if (cur.next?.prev) {
-                    cur.next.prev = node;
-                }
-                cur.next = node;
+        if (idx === this.length) {
+            this.push(node);
+            return;
+        }
 
-                this.length++;
-                break;
+        ++this.length;
+        let startFromHead = idx < this.length / 2;
+        idx = startFromHead ? idx : this.length - 1 - idx;
+
+        let curr = startFromHead ? this.head : this.tail;
+        for (let i = 0; curr && i < idx - 1; ++i) {
+            curr = startFromHead ? curr.next : curr.prev;
+        }
+        if (curr) {
+            node.prev = curr;
+            node.next = curr.next;
+            if (curr.next) {
+                curr.next.prev = node;
+                curr.next = node;
+            } else {
+                curr.next = { val: curr.val, next: null, prev: curr } as Node<T>;
+                curr.val = node.val;
             }
-            cur = cur.next;
-            ++c;
         }
     }
 
     removeAt(idx: number) {
-        if (idx > this.length) {
-            console.log(
-                `List length(${this.length}) exceeded. Cannot remove ${idx}`,
-            );
-            return;
-        }
-        if (idx + 1 === this.length) {
-            this.pop();
-            return;
-        }
-        if (idx === 0 && this.head.next) {
-            this.popFront();
-            return;
-        }
-        let c = 1;
-        let cur = this.head.next;
-        if (cur) {
-            while (cur.next) {
-                if (c === idx) {
-                    if (cur.prev) {
-                        cur.prev.next = cur.next;
-                    }
-                    if (cur.next) {
-                        cur.next.prev = cur.prev;
-                    }
-
-                    this.length--;
-                    break;
-                }
-                cur = cur.next;
-                c++;
-            }
-        }
     }
 
     replace(idx: number, val: T) {
-        if (idx > this.length) {
-            console.log(
-                `List length(${this.length}) exceeded. Cannot replace at ${idx}`,
-            );
+        if (idx >= this.length) {
+            // console.log("Invaild Index!");
             return;
         }
-        let c = 0;
-        let cur = this.head;
-        while (cur.next) {
-            if (c === idx) {
-                cur.val = val
-                break;
-            }
-            cur = cur.next;
-            c++;
+        let startFromHead = idx < this.length / 2;
+        idx = startFromHead ? idx : this.length - idx - 1;
+
+        let curr = startFromHead ? this.head : this.tail;
+        for (let i = 0; curr && i < idx; ++i) {
+            curr = startFromHead ? curr.next : curr.prev;
         }
-        cur.val = val;
+        if (curr) {
+            curr.val = val;
+        }
     }
 
-    get(idx: number) {
-        let c = 0;
-        let cur = this.head;
-        while (cur.next) {
-            if (c === idx) {
-                return cur.val;
-            }
-            cur = cur.next;
-            c++;
+    get(idx: number): T | undefined {
+        if (idx >= this.length) {
+            // console.log("Invaild Index!");
+            return;
         }
-        return cur.val;
+        let startFromHead = idx < this.length / 2;
+        idx = startFromHead ? idx : this.length - idx - 1;
+
+        let curr: OptNode<T> = startFromHead ? this.head : this.tail;
+        for (let i = 0; curr && i < idx; ++i) {
+            curr = startFromHead ? curr.next : curr.prev;
+        }
+        return curr ? curr.val : undefined;
     }
 
     toArray() {
-        const arr: T[] = [];
-        let cur = this.head;
-        while (cur.next) {
-            arr.push(cur.val);
-            cur = cur.next;
+        let arr = new Array<T | undefined>();
+        let curr: OptNode<T> = this.head;
+        for (let i = 0; curr && i < this.length; ++i) {
+            arr.push(curr.val);
+            curr = curr.next;
         }
-        arr.push(cur.val);
         return arr;
     }
 
     print() {
-        let cur = this.head;
-        while (cur.next) {
-            console.log(cur.val);
-            cur = cur.next;
+        let curr: OptNode<T> = this.head;
+        console.log(`Head: ${this.head ? this.head.val : null}; Tail: ${this.tail ? this.tail.val : null}`);
+        while (curr) {
+            console.log(`Node: ${curr.val}; Node[prev]: ${curr.prev ? curr.prev.val : null}; Node[next]: ${curr.next ? curr.next.val : null}`);
+            curr = curr.next;
         }
-        console.log(cur.val);
-        console.log(`length: ${this.length}`);
     }
 }
