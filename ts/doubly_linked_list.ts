@@ -83,7 +83,6 @@ export default class DLL<T> {
         }
         if (idx === this.length) {
             this.push(node);
-            console.log("pushing");
             return;
         }
 
@@ -103,12 +102,45 @@ export default class DLL<T> {
                 curr.next = node;
             } else {
                 curr.next = { val: curr.val, next: null, prev: curr } as Node<T>;
+                this.tail = curr.next;
                 curr.val = node.val;
             }
         }
     }
 
     removeAt(idx: number) {
+        if (idx >= this.length) {
+            console.log("Invalid Index!");
+            return;
+        }
+        if (idx === 0) {
+            console.log("popFront");
+            this.popFront();
+            return;
+        }
+        if (idx === this.length - 1) {
+            console.log("this dosn't work...");
+            this.pop();
+            return;
+        }
+
+        let startFromHead = idx < this.length / 2;
+        let curr = startFromHead ? this.head : this.tail;
+
+        for (let i = 0; i < idx; ++i) {
+            if (curr) {
+                curr = startFromHead ? curr.next : curr.prev;
+            } else {
+                console.log("Something is wrong...");
+            }
+        }
+        if (curr && curr.next && curr.prev) {
+            curr.next.prev = curr.prev;
+            curr.prev.next = curr.next;
+            curr.next = null;
+            curr.prev = null;
+            --this.length;
+        }
     }
 
     replace(idx: number, val: T) {

@@ -68,19 +68,15 @@ Deno.test("InsertAt", function insertAt() {
     list.push({ val: 3, next: null, prev: null });
 
     list.insertAt(0, { val: 10, next: null, prev: null });
-    console.log(list.toArray());
     assertEquals(list.toArray(), [10, 1, 2, 3]);
 
     list.insertAt(2, { val: 20, next: null, prev: null });
-    console.log(list.toArray());
     assertEquals(list.toArray(), [10, 1, 20, 2, 3]);
 
     list.insertAt(4, { val: 30, next: null, prev: null });
-    console.log(list.toArray());
     assertEquals(list.toArray(), [10, 1, 20, 2, 30, 3]);
 
     list.insertAt(6, { val: 40, next: null, prev: null });
-    console.log(list.toArray());
     assertEquals(list.toArray(), [10, 1, 20, 2, 30, 3, 40]);
 
 });

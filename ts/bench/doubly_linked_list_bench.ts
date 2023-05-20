@@ -1,7 +1,7 @@
 import DLL from "../doubly_linked_list.ts";
 const LARGE_NUM = 2048;
 
-let list = new DLL({ val: 1, next: null, prev: null });
+let list = new DLL();
 const v: number[] = [];
 
 for (let i = 0; i <= LARGE_NUM; i++) {
@@ -22,7 +22,7 @@ Deno.bench(function pop() {
         list.pop();
     }
 });
-list = new DLL({ val: 1, next: null, prev: null });
+list = new DLL();
 
 
 Deno.bench(function pushFront() {
@@ -39,7 +39,7 @@ Deno.bench(function popFront() {
         list.popFront();
     }
 });
-list = new DLL({ val: 1, next: null, prev: null });
+list = new DLL();
 
 // Deno.bench(function insertAt() {
 //     for (let i in v){
