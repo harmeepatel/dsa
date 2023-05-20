@@ -114,12 +114,10 @@ export default class DLL<T> {
             return;
         }
         if (idx === 0) {
-            console.log("popFront");
             this.popFront();
             return;
         }
         if (idx === this.length - 1) {
-            console.log("this dosn't work...");
             this.pop();
             return;
         }
