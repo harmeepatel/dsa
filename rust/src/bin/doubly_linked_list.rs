@@ -1,13 +1,10 @@
 #![allow(dead_code)]
 
-use std::{
-    fmt::{Debug, Display, Formatter, Result},
-    ptr::NonNull,
-};
+use std::{dbg, ptr::NonNull};
 
 fn main() {}
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 struct Node<T>
 where
     T: Copy,
@@ -15,18 +12,6 @@ where
     val: T,
     next: Option<NonNull<Node<T>>>,
     prev: Option<NonNull<Node<T>>>,
-}
-
-impl<T> Display for Node<T>
-where
-    T: Display + Copy,
-{
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self.next {
-            Some(node) => write!(f, "{} {}", self.val, unsafe { node.as_ref() }),
-            None => write!(f, "{}", self.val),
-        }
-    }
 }
 
 impl<T> Node<T>
@@ -41,8 +26,7 @@ where
         }
     }
 }
-
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 struct DoublyLinkedList<T>
 where
     T: Copy,
@@ -51,6 +35,8 @@ where
     head: Option<NonNull<Node<T>>>,
     tail: Option<NonNull<Node<T>>>,
 }
+
+#[derive(Copy, Clone)]
 struct DoublyLinkedListIntoIterator<T>
 where
     T: Copy,
@@ -58,15 +44,16 @@ where
     dll: DoublyLinkedList<T>,
 }
 
-impl<T> Display for DoublyLinkedList<T>
+impl<T> IntoIterator for DoublyLinkedList<T>
 where
-    T: Display + Copy,
+    T: Copy,
 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self.head {
-            Some(node) => write!(f, "{}", unsafe { node.as_ref() }),
-            None => Ok(()),
-        }
+    type Item = T;
+
+    type IntoIter = DoublyLinkedListIntoIterator<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        DoublyLinkedListIntoIterator { dll: self }
     }
 }
 
@@ -77,32 +64,20 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.dll.head == None {
-            return None;
-        } else {
-            unsafe {
-                let val = (*self.dll.head.unwrap().as_ptr()).val;
-                self.dll.head = (*self.dll.head.unwrap().as_ptr()).next;
+        match self.dll.head {
+            Some(head) => unsafe {
+                let val = (*head.as_ptr()).val;
+                self.dll.head = (*head.as_ptr()).next;
                 Some(val)
-            }
+            },
+            None => None,
         }
-    }
-}
-
-impl<T> IntoIterator for DoublyLinkedList<T>
-where
-    T: Copy,
-{
-    type Item = T;
-    type IntoIter = DoublyLinkedListIntoIterator<T>;
-    fn into_iter(self) -> Self::IntoIter {
-        DoublyLinkedListIntoIterator { dll: self }
     }
 }
 
 impl<T> DoublyLinkedList<T>
 where
-    T: Display + Copy,
+    T: Copy,
 {
     fn new() -> Self {
         DoublyLinkedList {
@@ -117,27 +92,38 @@ where
         new_node.prev = self.tail;
         let new_node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(new_node)) });
         match self.tail {
-            Some(tail) => unsafe { (*tail.as_ptr()).next = new_node_ptr },
+            Some(tail) => unsafe {
+                (*tail.as_ptr()).next = new_node_ptr;
+            },
             None => self.head = new_node_ptr,
         }
         self.tail = new_node_ptr;
         self.length += 1;
     }
 
-    fn pop(&mut self) -> std::result::Result<T, String> {
-        let node = match self.tail {
-            Some(n) => n,
-            None => return Err("Tail not found.".to_owned()),
-        };
-        unsafe {
-            self.tail = (*self.tail.unwrap().as_ptr()).prev;
-            (*self.tail.unwrap().as_ptr()).next = None;
-            (*node.as_ptr()).next = None;
-            (*node.as_ptr()).prev = None;
+    fn pop(&mut self) -> Option<T>
+    where
+        T: Copy,
+    {
+        let pop_node = self.tail;
+        match pop_node {
+            Some(node) => unsafe {
+                match (*node.as_ptr()).prev {
+                    Some(prev) => {
+                        self.tail = Some(prev);
+                        (*self.tail.unwrap().as_ptr()).next = None;
+                        (*node.as_ptr()).prev = None;
+                    }
+                    None => {
+                        self.tail = None;
+                        self.head = None;
+                    }
+                }
+            },
+            None => return None,
         }
-        drop(node);
         self.length -= 1;
-        Ok(unsafe { (*node.as_ptr()).val })
+        Some(unsafe { (*pop_node.unwrap().as_ptr()).val })
     }
 
     fn push_front(&mut self, val: T) {
@@ -145,30 +131,46 @@ where
         new_node.next = self.head;
         let new_node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(new_node)) });
         match self.head {
-            Some(head) => unsafe { (*head.as_ptr()).prev = new_node_ptr },
+            Some(head) => unsafe {
+                (*head.as_ptr()).prev = new_node_ptr;
+            },
             None => self.tail = new_node_ptr,
         }
         self.head = new_node_ptr;
         self.length += 1;
     }
 
-    fn pop_front(&mut self) -> std::result::Result<T, String> {
-        let node = match self.head {
-            Some(head) => head,
-            None => return Err("Head not found".to_owned()),
-        };
-        unsafe {
-            self.head = (*self.head.unwrap().as_ptr()).next;
-            (*self.head.unwrap().as_ptr()).prev = None;
-            (*node.as_ptr()).next = None;
-            (*node.as_ptr()).prev = None;
+    fn pop_front(&mut self) -> Option<T>
+    where
+        T: Copy,
+    {
+        let pop_node = self.head;
+        match pop_node {
+            Some(node) => unsafe {
+                match (*node.as_ptr()).next {
+                    Some(next) => {
+                        self.head = Some(next);
+                        (*self.head.unwrap().as_ptr()).prev = None;
+                        (*node.as_ptr()).next = None;
+                    }
+                    None => {
+                        self.head = None;
+                        self.tail = None;
+                    }
+                }
+            },
+            None => return None,
         }
-        drop(node);
+
         self.length -= 1;
-        Ok(unsafe { (*node.as_ptr()).val })
+        Some(unsafe { (*pop_node.unwrap().as_ptr()).val })
     }
 
-    pub fn insert_at(&mut self, val: T, index: usize) {
+    pub fn insert_at(&mut self, index: usize, val: T) {
+        if index > self.length {
+            dbg!("Index out of range!");
+            return;
+        }
         if index == 0 {
             self.push_front(val);
             return;
@@ -182,7 +184,7 @@ where
         match start_from_head {
             true => Self::insert_at_ith(self.head, val, index, start_from_head),
             false => Self::insert_at_ith(self.tail, val, self.length - 1 - index, start_from_head),
-        };
+        }
         self.length += 1;
     }
 
@@ -193,9 +195,13 @@ where
                     let mut new_node = Box::new(Node::new(val));
                     new_node.next = Some(current_node);
                     unsafe {
-                        new_node.prev = (*current_node.as_ref()).prev;
-                        (*(*current_node.as_ptr()).prev.unwrap().as_ptr()).next =
-                            Some(NonNull::new_unchecked(Box::into_raw(new_node.clone())));
+                        new_node.prev = (*current_node.as_ptr()).prev;
+                        if let Some(prev) = (*current_node.as_ptr()).prev {
+                            (*prev.as_ptr()).next =
+                                Some(NonNull::new_unchecked(Box::into_raw(new_node.clone())));
+                        } else {
+                            dbg!("Previous Node does not exist.");
+                        }
                         (*current_node.as_ptr()).prev =
                             Some(NonNull::new_unchecked(Box::into_raw(new_node.clone())));
                     }
@@ -213,17 +219,17 @@ where
                     start_from_head,
                 ),
             },
-            None => println!("Node not found"),
+            None => {
+                dbg!("Current Node is EMPTY!");
+            }
         }
     }
 
-    pub fn remove_at(&mut self, index: usize) -> std::result::Result<T, String> {
+    pub fn remove_at(&mut self, index: usize) -> Option<T> {
         if index >= self.length {
-            return Err(
-                format!("Index out of range.\nlinked list length: {}", self.length),
-            );
+            dbg!("Index out of range.");
+            return None;
         }
-
         if index == 0 {
             return self.pop_front();
         }
@@ -232,37 +238,35 @@ where
         }
 
         let start_from_head = index < self.length / 2;
-        match start_from_head {
-            true => {
-                let val = Self::remove_at_ith(self.head, index, start_from_head);
+        match match start_from_head {
+            true => Self::remove_at_ith(self.head, index, start_from_head),
+            false => Self::remove_at_ith(self.tail, self.length - 1 - index, start_from_head),
+        } {
+            Some(node) => {
                 self.length -= 1;
-                return val;
+                return unsafe { Some((*node.as_ptr()).val) };
             }
-            false => {
-                let val = Self::remove_at_ith(self.tail, self.length - 1 - index, start_from_head);
-                self.length -= 1;
-                return val;
-            }
-        };
+            None => None,
+        }
     }
 
     fn remove_at_ith(
         node: Option<NonNull<Node<T>>>,
         index: usize,
         start_from_head: bool,
-    ) -> std::result::Result<T, String> {
+    ) -> Option<NonNull<Node<T>>> {
         match node {
             Some(current_node) => match index {
                 0 => unsafe {
-                    (*(*current_node.as_ptr()).prev.unwrap().as_ptr()).next =
-                        (*current_node.as_ptr()).next;
-                    (*(*current_node.as_ptr()).next.unwrap().as_ptr()).prev =
-                        (*current_node.as_ptr()).prev;
-
+                    if let Some(next) = (*current_node.as_ptr()).next {
+                        (*next.as_ptr()).prev = (*current_node.as_ptr()).prev;
+                    }
+                    if let Some(prev) = (*current_node.as_ptr()).prev {
+                        (*prev.as_ptr()).next = (*current_node.as_ptr()).next;
+                    }
                     (*current_node.as_ptr()).next = None;
                     (*current_node.as_ptr()).prev = None;
-
-                    Ok((*current_node.as_ptr()).val)
+                    Some(current_node)
                 },
                 _ => Self::remove_at_ith(
                     unsafe {
@@ -276,38 +280,40 @@ where
                     start_from_head,
                 ),
             },
-            None => Err("Node not found.".to_owned()),
+
+            None => {
+                dbg!("Current Node is EMPTY!");
+                None
+            }
         }
     }
 
-    pub fn replace(&mut self, val: T, index: usize) -> std::result::Result<T, String> {
+    pub fn replace(&mut self, index: usize, val: T) -> Option<T> {
         if index >= self.length {
-            return Err(format!(
-                "Index out of range.\nlinked list length: {}",
-                self.length
-            ));
+            dbg!("Index out of range.");
+            return None;
         }
-        let start_from_head = index < self.length / 2;
 
+        let start_from_head = index < self.length / 2;
         match start_from_head {
             true => Self::replace_ith(self.head, val, index, start_from_head),
             false => Self::replace_ith(self.tail, val, self.length - 1 - index, start_from_head),
         }
     }
-    fn replace_ith<'a>(
+
+    fn replace_ith(
         node: Option<NonNull<Node<T>>>,
         val: T,
         index: usize,
         start_from_head: bool,
-    ) -> std::result::Result<T, String> {
+    ) -> Option<T> {
         match node {
             Some(current_node) => match index {
                 0 => unsafe {
-                    let curr_val = (*current_node.as_ptr()).val;
+                    let old_val = (*current_node.as_ptr()).val;
                     (*current_node.as_ptr()).val = val;
-                    return Ok(curr_val);
+                    Some(old_val)
                 },
-
                 _ => Self::replace_ith(
                     unsafe {
                         if start_from_head {
@@ -321,21 +327,43 @@ where
                     start_from_head,
                 ),
             },
-            None => Err("Node not found.".to_owned()),
+
+            None => {
+                dbg!("Current Node is EMPTY!");
+                None
+            }
         }
     }
 
     pub fn get(&mut self, index: usize) -> Option<&'static T> {
-        Self::get_ith_node(self.head, index)
+        let start_from_head = index < self.length / 2;
+        match start_from_head {
+            true => Self::get_ith_node(self.head, index, start_from_head),
+            false => Self::get_ith_node(self.tail, self.length - 1 - index, start_from_head),
+        }
     }
 
-    fn get_ith_node(node: Option<NonNull<Node<T>>>, index: usize) -> Option<&'static T> {
+    fn get_ith_node<'a>(
+        node: Option<NonNull<Node<T>>>,
+        index: usize,
+        start_from_head: bool,
+    ) -> Option<&'a T> {
         match node {
-            Some(node_ptr) => match index {
-                0 => Some(unsafe { &(*node_ptr.as_ptr()).val }),
-                _ => Self::get_ith_node(unsafe { (*node_ptr.as_ptr()).next }, index - 1),
+            Some(node) => match index {
+                0 => Some(unsafe { &(*node.as_ptr()).val }),
+                _ => Self::get_ith_node(
+                    unsafe {
+                        if start_from_head {
+                            (*node.as_ptr()).next
+                        } else {
+                            (*node.as_ptr()).prev
+                        }
+                    },
+                    index - 1,
+                    start_from_head,
+                ),
             },
-            None => None,
+            None => todo!(),
         }
     }
 }
@@ -350,23 +378,20 @@ mod test {
         list.push(1);
         list.push(2);
         list.push(3);
-        match list.get(1) {
-            Some(val) => assert_eq!(*val, 2),
-            None => panic!("Expected to find {} at index 1", 2),
-        }
+        let arr = list.into_iter().collect::<Vec<_>>();
+        assert_eq!(arr, vec![1, 2, 3]);
     }
 
     #[test]
     fn push_front() {
         let mut list = DoublyLinkedList::<i32>::new();
         list.push(1);
-        list.push(2);
-        list.push(3);
         list.push_front(4);
-        match list.get(0) {
-            Some(val) => assert_eq!(*val, 4),
-            None => panic!("Expected to find {} at index 0", 4),
-        }
+        list.push(2);
+        list.push_front(3);
+        list.push(5);
+        let arr = list.into_iter().collect::<Vec<_>>();
+        assert_eq!(arr, vec![3, 4, 1, 2, 5]);
     }
 
     #[test]
@@ -375,9 +400,38 @@ mod test {
         list.push(1);
         list.push(2);
         list.push(3);
-        list.push(4);
-        let val = list.pop().unwrap();
-        assert_eq!(val, 4);
+        match list.pop() {
+            Some(val) => {
+                assert_eq!(val, 3);
+            }
+            None => {
+                dbg!("First pop failed.");
+            }
+        };
+        match list.pop() {
+            Some(val) => {
+                assert_eq!(val, 2);
+            }
+            None => {
+                dbg!("Second pop failed.");
+            }
+        };
+        match list.pop() {
+            Some(val) => {
+                assert_eq!(val, 1);
+            }
+            None => {
+                dbg!("Third pop failed.");
+            }
+        };
+        match list.pop() {
+            Some(_) => {
+                dbg!("Should not have found this.");
+            }
+            None => {
+                assert!(true);
+            }
+        };
     }
 
     #[test]
@@ -386,9 +440,38 @@ mod test {
         list.push(1);
         list.push(2);
         list.push(3);
-        list.push(4);
-        let val = list.pop_front().unwrap();
-        assert_eq!(val, 1);
+        match list.pop_front() {
+            Some(val) => {
+                assert_eq!(val, 1);
+            }
+            None => {
+                dbg!("First pop_front failed.");
+            }
+        };
+        match list.pop_front() {
+            Some(val) => {
+                assert_eq!(val, 2);
+            }
+            None => {
+                dbg!("Second pop_front failed.");
+            }
+        };
+        match list.pop_front() {
+            Some(val) => {
+                assert_eq!(val, 3);
+            }
+            None => {
+                dbg!("Third pop_front failed.");
+            }
+        };
+        match list.pop_front() {
+            Some(_) => {
+                dbg!("Should not have found this.");
+            }
+            None => {
+                assert!(true);
+            }
+        };
     }
 
     #[test]
@@ -397,17 +480,20 @@ mod test {
         list.push(1);
         list.push(2);
         list.push(3);
-        list.insert_at(4, 0);
-        list.insert_at(5, 2);
-        let arr = list.into_iter().collect::<Vec<_>>();
+        list.insert_at(0, 4);
+        let mut arr = list.into_iter().collect::<Vec<_>>();
+        assert_eq!(arr, vec![4, 1, 2, 3]);
+
+        list.insert_at(2, 5);
+        arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(arr, vec![4, 1, 5, 2, 3]);
 
-        list.insert_at(6, 4);
-        let arr = list.into_iter().collect::<Vec<_>>();
+        list.insert_at(4, 6);
+        arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(arr, vec![4, 1, 5, 2, 6, 3]);
 
-        list.insert_at(7, list.length);
-        let arr = list.into_iter().collect::<Vec<_>>();
+        list.insert_at(list.length, 7);
+        arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(arr, vec![4, 1, 5, 2, 6, 3, 7]);
     }
 
@@ -421,18 +507,18 @@ mod test {
         list.push(5);
         list.push(6);
 
-        let v = list.remove_at(0).unwrap();
-        let arr = list.into_iter().collect::<Vec<_>>();
+        let mut v = list.remove_at(0).unwrap();
+        let mut arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 1);
         assert_eq!(arr, vec![2, 3, 4, 5, 6]);
 
-        let v = list.remove_at(1).unwrap();
-        let arr = list.into_iter().collect::<Vec<_>>();
+        v = list.remove_at(1).unwrap();
+        arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 3);
         assert_eq!(arr, vec![2, 4, 5, 6]);
 
-        let v = list.remove_at(list.length - 1).unwrap();
-        let arr = list.into_iter().collect::<Vec<_>>();
+        v = list.remove_at(list.length - 1).unwrap();
+        arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 6);
         assert_eq!(arr, vec![2, 4, 5]);
     }
@@ -446,17 +532,17 @@ mod test {
         list.push(4);
         list.push(5);
 
-        let v = list.replace(10, 0).unwrap();
+        let v = list.replace(0, 10).unwrap();
         let arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 1);
         assert_eq!(arr, vec![10, 2, 3, 4, 5]);
 
-        let v = list.replace(30, 2).unwrap();
+        let v = list.replace(2, 30).unwrap();
         let arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 3);
         assert_eq!(arr, vec![10, 2, 30, 4, 5]);
 
-        let v = list.replace(50, list.length - 1).unwrap();
+        let v = list.replace(list.length - 1, 50).unwrap();
         let arr = list.into_iter().collect::<Vec<_>>();
         assert_eq!(v, 5);
         assert_eq!(arr, vec![10, 2, 30, 4, 50]);

@@ -5,9 +5,7 @@ fn sort(arr: &mut [i32]) {
     for i in 1..arr.len() {
         for j in 0..arr.len() - i {
             if arr[j] > arr[j + 1] {
-                let a = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = a;
+                arr.swap(j, j + 1)
             }
         }
     }
@@ -18,9 +16,7 @@ fn rev_sort(arr: &mut [i32]) {
     for i in 1..arr.len() {
         for j in 0..i {
             if arr[j] > arr[j + 1] {
-                let a = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = a;
+                arr.swap(j, j + 1)
             }
         }
     }
