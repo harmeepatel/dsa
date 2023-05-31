@@ -74,7 +74,7 @@ export default class DLL<T> {
 
     insertAt(idx: number, node: Node<T>) {
         if (idx > this.length) {
-            console.log("Invaild Index!");
+            console.log(`Invaild Index: ${idx}`);
             return;
         }
         if (idx === 0) {

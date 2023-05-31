@@ -1,7 +1,7 @@
 import { assertThrows, assertEquals } from "https://deno.land/std@0.167.0/testing/asserts.ts";
-import DLL from "../doubly_linked_list.ts";
+import DLL from "../data_structures/doubly_linked_list.ts";
 
-Deno.test("Push", function push() {
+Deno.test("DoublyLinkedList::Push", function push() {
     const list = new DLL();
     assertEquals(list.toArray(), []);
 
@@ -12,7 +12,7 @@ Deno.test("Push", function push() {
     assertEquals(list.toArray(), [1, 2, 3]);
 });
 
-Deno.test("Pop", function pop() {
+Deno.test("DoublyLinkedList::Pop", function pop() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.push({ val: 2, next: null, prev: null });
@@ -40,7 +40,7 @@ Deno.test("Pop", function pop() {
 
 });
 
-Deno.test("PushFront", function pushFront() {
+Deno.test("DoublyLinkedList::PushFront", function pushFront() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.pushFront({ val: 2, next: null, prev: null });
@@ -50,7 +50,7 @@ Deno.test("PushFront", function pushFront() {
     assertEquals(list.toArray(), [4, 2, 1, 3]);
 });
 
-Deno.test("PopFront", function popFront() {
+Deno.test("DoublyLinkedList::PopFront", function popFront() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.pushFront({ val: 2, next: null, prev: null });
@@ -61,7 +61,7 @@ Deno.test("PopFront", function popFront() {
     assertEquals(list.toArray(), [2, 1]);
 });
 
-Deno.test("InsertAt", function insertAt() {
+Deno.test("DoublyLinkedList::InsertAt", function insertAt() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.push({ val: 2, next: null, prev: null });
@@ -81,7 +81,7 @@ Deno.test("InsertAt", function insertAt() {
 
 });
 
-Deno.test("RemoveAt", function removeAt() {
+Deno.test("DoublyLinkedList::RemoveAt", function removeAt() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.push({ val: 2, next: null, prev: null });
@@ -99,7 +99,7 @@ Deno.test("RemoveAt", function removeAt() {
     assertEquals(list.toArray(), [1, 2, 3]);
 });
 
-Deno.test("Replace", function replace() {
+Deno.test("DoublyLinkedList::Replace", function replace() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.push({ val: 2, next: null, prev: null });
@@ -117,7 +117,7 @@ Deno.test("Replace", function replace() {
     assertEquals(list.toArray(), [40, 2, 30, 4, 20, 6, 7, 10]);
 });
 
-Deno.test("Get", function get() {
+Deno.test("DoublyLinkedList::Get", function get() {
     const list = new DLL();
     list.push({ val: 1, next: null, prev: null });
     list.push({ val: 2, next: null, prev: null });

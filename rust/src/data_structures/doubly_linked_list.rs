@@ -1,11 +1,7 @@
-#![allow(dead_code)]
-
 use std::{dbg, ptr::NonNull};
 
-fn main() {}
-
 #[derive(Copy, Clone)]
-struct Node<T>
+pub struct Node<T>
 where
     T: Copy,
 {
@@ -27,7 +23,7 @@ where
     }
 }
 #[derive(Copy, Clone)]
-struct DoublyLinkedList<T>
+pub struct DoublyLinkedList<T>
 where
     T: Copy,
 {
@@ -37,7 +33,7 @@ where
 }
 
 #[derive(Copy, Clone)]
-struct DoublyLinkedListIntoIterator<T>
+pub struct DoublyLinkedListIntoIterator<T>
 where
     T: Copy,
 {
@@ -79,7 +75,7 @@ impl<T> DoublyLinkedList<T>
 where
     T: Copy,
 {
-    fn new() -> Self {
+    pub fn new() -> Self {
         DoublyLinkedList {
             length: 0,
             head: None,
@@ -87,7 +83,7 @@ where
         }
     }
 
-    fn push(&mut self, val: T) {
+    pub fn push(&mut self, val: T) {
         let mut new_node = Box::new(Node::new(val));
         new_node.prev = self.tail;
         let new_node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(new_node)) });
@@ -101,7 +97,7 @@ where
         self.length += 1;
     }
 
-    fn pop(&mut self) -> Option<T>
+    pub fn pop(&mut self) -> Option<T>
     where
         T: Copy,
     {
@@ -126,7 +122,7 @@ where
         Some(unsafe { (*pop_node.unwrap().as_ptr()).val })
     }
 
-    fn push_front(&mut self, val: T) {
+    pub fn push_front(&mut self, val: T) {
         let mut new_node = Box::new(Node::new(val));
         new_node.next = self.head;
         let new_node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(new_node)) });
@@ -140,7 +136,7 @@ where
         self.length += 1;
     }
 
-    fn pop_front(&mut self) -> Option<T>
+    pub fn pop_front(&mut self) -> Option<T>
     where
         T: Copy,
     {
@@ -369,7 +365,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
