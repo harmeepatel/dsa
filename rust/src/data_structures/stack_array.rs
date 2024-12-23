@@ -36,6 +36,7 @@ where
             }
         }
     }
+
     pub fn pop(&mut self) -> Result<T, &str> {
         if self.capacity == 0 {
             return Err("Stack is Empyt!");

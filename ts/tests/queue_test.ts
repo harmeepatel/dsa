@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "https://deno.land/std@0.167.0/testing/asserts.ts";
-import LLQueue from "../data_structures/linked_list_queue.ts";
+import LLQueue from "../data_structures/queue_linked_list.ts";
 
 Deno.test("LLQueue::PushingAndPoping", function() {
     let out = new Array<number>();

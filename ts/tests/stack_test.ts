@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "https://deno.land/std@0.167.0/testing/asserts.ts";
-import ArrayStack from "../data_structures/array_stack.ts";
-import LLStack from "../data_structures/linked_list_stack.ts";
+import ArrayStack from "../data_structures/stack_array.ts";
+import LLStack from "../data_structures/stack_linked_list.ts";
 
 Deno.test("ArrayStack::PushingAndPoping", function() {
     let size = 4;

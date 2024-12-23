@@ -155,5 +155,4 @@ mod tests {
         let mut s = Queue::<i32>::new();
         assert_eq!(s.dequeue().err().unwrap(), "Queue is Empty!");
     }
-
 }
