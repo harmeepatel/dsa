@@ -221,8 +221,9 @@ TYPE pop_at(struct DLL* dll, int pos)
 
     ith->next = NULL;
     ith->prev = NULL;
-    free(ith);
 
+    --dll->len;
+    free(ith);
     return val;
 }
 
@@ -277,6 +278,11 @@ int main()
     print_dll(dll);
 
     assert(dll->len == len);
+
+    // replace
+    struct Node* i = ith_node(dll, 8);
+    i->val = 99;
+    print_dll(dll);
 
     free_dll(dll);
     return 0;
