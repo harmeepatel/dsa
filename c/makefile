@@ -1,2 +1,2 @@
 run:
-	zig cc $(o).c -o $(o) && ./$(o)
+	zig cc $(o).c -ggdb3 -o $(o) && ./$(o)
