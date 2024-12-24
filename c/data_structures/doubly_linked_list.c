@@ -276,7 +276,7 @@ int main()
     --len;
     print_dll(dll);
 
-    // assert(dll->len == len);
+    assert(dll->len == len);
 
     free_dll(dll);
     return 0;
