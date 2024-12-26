@@ -1,14 +1,10 @@
 #include <assert.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef int TYPE;
-
-enum Bool {
-    FALSE,
-    TRUE,
-};
 
 void printAndExit(char* str)
 {
@@ -129,7 +125,7 @@ struct Node* node_with_val(struct DLL* dll, TYPE needle)
 }
 
 // modify
-enum Bool push_first(struct DLL* dll, TYPE val)
+bool push_first(struct DLL* dll, TYPE val)
 {
     struct Node* newNode = create_node(val);
 
@@ -138,10 +134,10 @@ enum Bool push_first(struct DLL* dll, TYPE val)
     dll->head = newNode;
 
     ++dll->len;
-    return TRUE;
+    return true;
 }
 
-enum Bool push_last(struct DLL* dll, TYPE val)
+bool push_last(struct DLL* dll, TYPE val)
 {
     struct Node* newNode = create_node(val);
 
@@ -150,21 +146,21 @@ enum Bool push_last(struct DLL* dll, TYPE val)
     dll->tail = newNode;
 
     ++dll->len;
-    return TRUE;
+    return true;
 }
 
-enum Bool push_at(struct DLL* dll, int pos, TYPE val)
+bool push_at(struct DLL* dll, int pos, TYPE val)
 {
     if (pos < 0 || pos > dll->len) {
         printAndExit("!!! cannot insert at invalid position");
     }
     if (pos == 0) {
         push_first(dll, val);
-        return TRUE;
+        return true;
     }
     if (pos == dll->len) {
         push_last(dll, val);
-        return TRUE;
+        return true;
     }
     struct Node* newNode = create_node(val);
 
@@ -176,7 +172,7 @@ enum Bool push_at(struct DLL* dll, int pos, TYPE val)
     ith->prev = newNode;
 
     ++dll->len;
-    return TRUE;
+    return true;
 }
 
 TYPE pop_first(struct DLL* dll)
@@ -235,14 +231,14 @@ int main()
 
     // push_last
     for (int i = 1; i <= 8; ++i) {
-        if (push_last(dll, i) == FALSE) {
+        if (push_last(dll, i) == false) {
             printAndExit("!!! failed to append");
         }
         ++len;
     }
     // push_first
     for (int i = 1; i <= 8; ++i) {
-        if (push_first(dll, i * -1) == FALSE) {
+        if (push_first(dll, i * -1) == false) {
             printAndExit("!!! failed to prepend");
         }
         ++len;
